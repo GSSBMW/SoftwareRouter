@@ -1,8 +1,8 @@
-#ifndef FLOW_STATISTICS_H
-#define FLOW_STATISTICS_H
+#ifndef OCL_TRAFFIC_STATISTICS_HPP_
+#define OCL_TRAFFIC_STATISTICS_HPP_
 
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#include <cstdio>
+#include <cstdlib>
 #include <CL/cl.h>
 
 /*
@@ -41,14 +41,10 @@ struct flow_table_entry
 } __attribute__ ((aligned(4)));
 typedef struct flow_table_entry flow_table_entry_t;
 
-
-void ConstructPacketInfo(packet_info_t *&packets_info, size_t num);
-//void ConstructFlowTable(flow_table_entry_t *&flow_table, size_t flow_talbe_size);
-
-void FlowStatistics(const unsigned int &flow_table_size, 
-					flow_table_entry_t **flow_table,
-					const unsigned int &packets_num, 
-					packet_info_t *packets );
+void ConstructPacketsInfo(packet_info_t *&packets_info, const size_t num);
+void TrafficStatistics(const unsigned int &flow_table_size, flow_table_entry_t **flow_table,
+                    const unsigned int &packets_num, packet_info_t *packets);
 bool Tuple5Equal(const tuple5_t &v1, const tuple5_t &v2);
 
-#endif // FLOW_STATISTICS_H
+
+#endif // OCL_TRAFFIC_STATISTICS_HPP_

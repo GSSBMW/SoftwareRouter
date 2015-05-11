@@ -1,12 +1,14 @@
-#include "./flow_statistics.h"
+#include "traffic_statistics.hpp"
 #include <malloc.h>
 
-void ConstructPacketInfo(packet_info_t *&packets_info, size_t num)
+void ConstructPacketsInfo(packet_info_t *&packets_info, const size_t num)
 {
-	free(packets_info);
-	packets_info = (packet_info_t*) malloc(num*sizeof(packet_info_t));
-	for (int i=0; i<num; ++i)
-	{
+    free(packets_info);
+    int ret = posix_memalign((void**)&packets_info, 64, num*sizeof(packet_info_t));
+    if (0 != ret) { printf("Error: posix_memalign() return %d\n", ret); }
+
+    for (int i=0; i<num; ++i)
+    {
 		packets_info[i].flow_id.src_ip = 0xC0A80304; //192.168.3.4
 		packets_info[i].flow_id.dst_ip = 0xC0A80403; //192.168.4.3
 		packets_info[i].flow_id.src_port = 5000;
@@ -14,33 +16,20 @@ void ConstructPacketInfo(packet_info_t *&packets_info, size_t num)
 		packets_info[i].flow_id.protocol = 3;
 		packets_info[i].packet_size = 1024;
 		packets_info[i].index = -1;
-	}
+    }
 }
 
-/*void ConstructFlowTable(flow_table_entry_t **&flow_table, size_t flow_table_size)
+void TrafficStatistics(const unsigned int &flow_table_size,
+                    flow_table_entry_t **flow_table,
+                    const unsigned int &packets_num,
+                    packet_info_t *packets)
 {
-	free(flow_table);
-	flow_table = (flow_table_entry_t*) malloc(flow_table_size*sizeof(flow_table_entry_t));
-	for (int i=0; i<flow_table_size; ++i)
-	{
-		flow_table[i].throughput = 0;
-		flow_table[i].invalid = true;
-		flow_table[i].p_next = NULL;	
-	}
-}
-*/
-void FlowStatistics(const unsigned int &flow_table_size, 
-					flow_table_entry_t **flow_table,
-					const unsigned int &packets_num, 
-					packet_info_t *packets )
-{
-	unsigned int index;
-	flow_table_entry_t *pp, *p;
+    unsigned int index;
+    flow_table_entry_t *pp, *p;
 
 	for (int i=0; i<packets_num; ++i)
 	{
 		index = packets[i].index;
-		printf("i: %d\tindex: %d\n", i, index);
 		if (NULL == flow_table[index])
 		{
 			flow_table[index] = (flow_table_entry_t*)malloc(sizeof(flow_table_entry_t));
@@ -83,9 +72,8 @@ void FlowStatistics(const unsigned int &flow_table_size,
 			pp->next->next = NULL;
 			continue;
 		}
-	}
-}
-
+	} // for (int i=0; i<packets_num; ++i)
+} // FlowStatistics()
 
 bool Tuple5Equal(const tuple5_t &v1, const tuple5_t &v2)
 {
@@ -98,4 +86,3 @@ bool Tuple5Equal(const tuple5_t &v1, const tuple5_t &v2)
 	else
 		return false;
 }
-
